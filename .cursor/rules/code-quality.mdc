@@ -1,0 +1,19 @@
+---
+description: Python code quality
+alwaysApply: true
+---
+
+Use:
+- Python 3.12+
+- Type hints
+- Ruff-compatible style
+
+Prefer:
+- Small functions
+- Explicit naming
+- Dependency injection
+
+Avoid:
+- Deep nesting
+- God classes
+- Hidden side effects

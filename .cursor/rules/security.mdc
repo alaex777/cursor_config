@@ -1,0 +1,20 @@
+---
+description: Security review
+alwaysApply: true
+---
+
+Review:
+- Authentication
+- Authorization
+- Secrets handling
+- Input validation
+
+Check for:
+- SQL injection
+- SSRF
+- IDOR
+- Privilege escalation
+
+Never:
+- Hardcode secrets
+- Disable security checks

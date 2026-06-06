@@ -1,0 +1,17 @@
+---
+description: SQLAlchemy standards
+alwaysApply: true
+---
+
+Use:
+- SQLAlchemy 2.x style
+- AsyncSession
+- Explicit transactions
+
+Prefer:
+- Repository pattern
+- Service layer
+
+Avoid:
+- Raw SQL when ORM is sufficient
+- N+1 queries

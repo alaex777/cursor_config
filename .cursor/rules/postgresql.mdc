@@ -1,0 +1,15 @@
+---
+description: PostgreSQL best practices
+alwaysApply: true
+---
+
+Consider:
+- Proper indexes
+- Query efficiency
+- Constraints
+- Data consistency
+
+Review:
+- Execution plans
+- Join efficiency
+- Pagination strategy

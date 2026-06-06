@@ -1,0 +1,19 @@
+---
+description: FastAPI standards
+alwaysApply: true
+---
+
+Use:
+- APIRouter
+- Dependency Injection
+- Pydantic v2
+- Async endpoints
+
+Avoid:
+- Business logic inside routes
+- Global state
+- Large route handlers
+
+Generate:
+- Response models
+- OpenAPI documentation

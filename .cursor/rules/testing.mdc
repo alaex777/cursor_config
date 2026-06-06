@@ -1,0 +1,20 @@
+---
+description: Testing standards
+alwaysApply: true
+---
+
+Use:
+- pytest
+- fixtures
+
+For every feature:
+- Happy path
+- Validation errors
+- Edge cases
+
+Prefer:
+- Independent tests
+- Clear test names
+
+Avoid:
+- Brittle mocks
