@@ -1,0 +1,8 @@
+main_branch: main
+obsidian_vault: /absolute/path/to/vault
+
+repos:
+  - name: billing
+    path: ../billing
+  - name: auth
+    path: ../auth

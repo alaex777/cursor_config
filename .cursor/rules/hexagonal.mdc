@@ -1,0 +1,59 @@
+---
+description: Hexagonal architecture layer rules
+globs: **/*.py
+alwaysApply: false
+---
+
+# Hexagonal Architecture
+
+## Layer dependency order
+
+```
+domain ← application ← infrastructure / interfaces
+```
+
+`domain` — pure Python: entities, exceptions, async `Protocol` ports.
+No FastAPI, SQLAlchemy, Pydantic, httpx.
+
+`application` — use cases and optional DTOs when the result differs from a domain entity.
+Imports `domain` (and its own packages). No infrastructure, interfaces, or frameworks.
+
+`infrastructure` — implements outbound ports (SQLAlchemy, httpx, …).
+
+`interfaces` — inbound adapters. FastAPI routers and Pydantic HTTP schemas.
+Calls use cases only. Maps domain results to HTTP. No SQL, no business rules.
+
+`main.py` — composition root. The only module that imports both
+`infrastructure` and `interfaces`.
+
+## Ports
+
+Define ports as `typing.Protocol` in `domain/ports/`.
+Methods are `async def`.
+Name ports after their role: `NoteRepository`, `EmailSender`, `PaymentGateway`.
+
+## Use cases
+
+One class per use case: `GetNoteById`, `CreateUser`, `CancelOrder`.
+Constructor receives ports via dependency injection (plain `__init__`, not FastAPI `Depends`).
+Single public method: `async def execute(...)`.
+
+## HTTP schemas
+
+Pydantic v2 models live in `interfaces/api/schemas/`.
+Do not use domain dataclasses as FastAPI `response_model`.
+
+## No cross-layer imports
+
+```python
+# BAD — infrastructure in domain
+from sqlalchemy.orm import Session  # inside domain/
+
+# BAD — adapter in interfaces
+from app.infrastructure.persistence.tables import NoteTable  # inside interfaces/
+
+# GOOD
+from app.domain.ports.note_repository import NoteRepository  # in application/
+```
+
+Wire adapters in `main.py` and pass use cases into `build_*_router(...)`.

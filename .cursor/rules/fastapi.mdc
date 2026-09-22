@@ -4,16 +4,18 @@ alwaysApply: true
 ---
 
 Use:
-- APIRouter
-- Dependency Injection
-- Pydantic v2
-- Async endpoints
+- APIRouter only in `interfaces/api/`
+- Pydantic v2 schemas in `interfaces/api/schemas/`
+- Async endpoints that call a use case and map the result to a schema
+- Routers built by `build_*_router(*, use_case: ...)` — dependencies come from `main.py`
 
 Avoid:
+- FastAPI `Depends` for use cases, ports, or SQLAlchemy sessions
 - Business logic inside routes
+- Domain dataclasses as `response_model`
 - Global state
 - Large route handlers
 
 Generate:
-- Response models
+- Response models (Pydantic)
 - OpenAPI documentation

@@ -7,6 +7,7 @@ Use:
 - Python 3.12+
 - Type hints
 - Ruff-compatible style
+- mypy strict mode
 
 Prefer:
 - Small functions

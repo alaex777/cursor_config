@@ -4,14 +4,17 @@ alwaysApply: true
 ---
 
 Use:
-- SQLAlchemy 2.x style
-- AsyncSession
-- Explicit transactions
+- SQLAlchemy 2.x style (`Mapped`, `mapped_column`)
+- `AsyncSession` / `async_sessionmaker`
+- Explicit transactions in the adapter
+- A repository class that implements a domain port
 
 Prefer:
-- Repository pattern
-- Service layer
+- Session factory injected into the repository constructor
+- Table classes named `*Table`, distinct from domain entities
 
 Avoid:
+- A "service layer" on top of use cases — application use cases are the orchestration
 - Raw SQL when ORM is sufficient
 - N+1 queries
+- Importing SQLAlchemy from `domain`, `application`, or `interfaces`

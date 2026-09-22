@@ -1,0 +1,60 @@
+---
+description: Naming and explicit parameters
+globs: **/*.py
+alwaysApply: false
+---
+
+# Naming and Explicit Parameters
+
+## Names describe intent, not mechanism
+
+```python
+# BAD
+def handle(data):
+def process(obj):
+def run(x):
+
+# GOOD
+def get_health_status(provider: HealthStatusProvider) -> HealthStatus:
+def create_user_account(user_data: CreateUserDTO) -> UserAccount:
+def cancel_pending_order(order_id: OrderId, reason: CancellationReason) -> CancelledOrder:
+```
+
+## Explicit parameters — always pass by keyword when ambiguous
+
+```python
+# BAD
+status = HealthStatus(True, "ok")
+
+# GOOD
+status = HealthStatus(is_alive=True, message="ok")
+```
+
+Boolean arguments are always keyword-only:
+
+```python
+def send_notification(*, send_copy_to_admin: bool) -> None: ...
+```
+
+## No magic values
+
+```python
+# BAD
+if status == 2:
+
+# GOOD
+if status == OrderStatus.CONFIRMED:
+```
+
+## Collections and optionals are named clearly
+
+```python
+# BAD
+items: list
+d: dict
+
+# GOOD
+pending_orders: list[Order]
+user_by_email: dict[str, User]
+found_user: User | None
+```

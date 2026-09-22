@@ -7,6 +7,10 @@ Use:
 - pytest
 - fixtures
 
+Layers:
+- unit tests → domain entities and application use cases only
+- integration tests → infrastructure adapters and HTTP endpoints
+
 For every feature:
 - Happy path
 - Validation errors
@@ -15,6 +19,9 @@ For every feature:
 Prefer:
 - Independent tests
 - Clear test names
+- Real in-process fakes over mocks for ports
 
 Avoid:
-- Brittle mocks
+- Mocking domain objects
+- Testing infrastructure logic in unit tests
+- Brittle mocks of ports — implement a fake adapter instead
