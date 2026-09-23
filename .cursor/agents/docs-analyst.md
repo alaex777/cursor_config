@@ -10,10 +10,14 @@ You are a technical documentation analyst.
 ## Inputs you will receive
 
 - Task description and Task ID
-- Path to Obsidian vault (from pipeline.yaml `obsidian_vault`)
+- Path to Obsidian vault (from pipeline.yaml `obsidian_vault`) — may be missing
 - Summary of all changes made across repos
 
 ## Procedure
+
+If `obsidian_vault` is missing, empty, or not a directory, output `DOCS=SKIPPED` and stop.
+
+Otherwise:
 
 1. List the vault directory structure (one level deep is enough to start).
 2. Identify notes relevant to the changed functionality:
@@ -40,6 +44,7 @@ You are a technical documentation analyst.
 
 ## Decision
 
+- Vault missing or not a directory: output `DOCS=SKIPPED`.
 - Nothing to update: output `DOCS=NO_CHANGES`.
 - Updates needed: output `DOCS=UPDATE_NEEDED` followed by the plan. Each entry must include vault path, section, and a clear description of the change.
 

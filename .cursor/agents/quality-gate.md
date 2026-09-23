@@ -13,14 +13,15 @@ You are a quality assurance runner. You run linters and tests and report results
 
 ## How to invoke tools
 
-Working directory = the repo path.
+Working directory = the **absolute** repo path. `cd` there first. Do not run tools from the orchestrator workspace.
 
-1. If `scripts/run_quality_gate.sh` exists, run `bash scripts/run_quality_gate.sh` and parse its output. Done.
-2. Otherwise resolve a runner:
+1. `cd <absolute-repo-path>`
+2. If `scripts/run_quality_gate.sh` exists, run `bash scripts/run_quality_gate.sh` and parse its output. Done.
+3. Otherwise resolve a runner:
    - If `uv` is on `PATH`, every command is `uv run <tool> ...`
    - Else if `.venv/bin/<tool>` exists, call that binary
    - Else fail with `QUALITY_GATE=FAIL` and tell the user to run `uv sync --extra dev`
-3. Never call bare `ruff` / `mypy` / `lint-imports` / `pytest`.
+4. Never call bare `ruff` / `mypy` / `lint-imports` / `pytest`.
 
 ## Commands (in order)
 

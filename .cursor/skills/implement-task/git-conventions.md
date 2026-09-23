@@ -66,7 +66,9 @@ Never `git add -A`. Never stage `.venv`, `.env`, `.env.*`, caches, secrets, or `
 
 ## Push
 
-Never commit or push while `HEAD` is `main` or `master`. Create (or switch to) the feature branch first, then verify:
+Never commit or push while `HEAD` is `main` or `master`. Create the feature branch first.
+
+If the target branch already exists locally or on `origin`, **abort** — do not check it out or reuse it.
 
 ```bash
 git branch --show-current   # must not be main/master

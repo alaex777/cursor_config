@@ -1,4 +1,5 @@
 main_branch: main
+auto_push: false
 obsidian_vault: /absolute/path/to/vault
 
 repos:

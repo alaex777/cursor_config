@@ -6,16 +6,19 @@ Personal Cursor AI configuration and project template for Python async backend d
 
 ```
 .cursor/
-  rules/       Coding standards applied automatically to every session
-  roles/       System-prompt personas for different task types
-  agents/      Custom subagents for the implementation pipeline
-  skills/      Orchestration skill: implement-task pipeline
-template/      Hexagonal service scaffold — copy to start a new service
-pipeline.yaml.example  Template for wiring multiple repos to the pipeline
-README.md      This file
+  rules/       Coding standards for Python services
+  roles/       System-prompt personas
+  agents/      Pipeline subagents (orchestrator workspace only)
+  skills/      implement-task orchestration (orchestrator workspace only)
+template/      Hexagonal service scaffold + GitHub Actions
+scripts/       init-service.sh
+pipeline.yaml.example
+README.md
 ```
 
-## Rules (always applied)
+Keep **skills and agents in this repo** (the orchestrator workspace). Copy **rules/roles only** into each service — never the pipeline skill.
+
+## Rules
 
 | Rule | Purpose |
 |---|---|
@@ -40,48 +43,41 @@ README.md      This file
 
 | Agent | Model | Purpose |
 |---|---|---|
-| `repo-sync` | fast | Checkout + pull `main_branch` in all repos |
-| `planner` | full | Codebase analysis + per-service implementation plan |
-| `implementer` | fast | Implements one service plan (hexagonal layers + tests) |
-| `quality-gate` | fast | Runs ruff / mypy / import-linter / pytest |
+| `repo-sync` | fast | Fast-forward all repos onto `main_branch` |
+| `planner` | full | Per-service plan, shared contracts, implementation waves |
+| `implementer` | fast | One service; **resume** on rework |
+| `quality-gate` | fast | ruff / mypy / import-linter / pytest in the service directory |
 | `quality-fixer` | fast | Fixes quality-gate failures |
-| `plan-auditor` | full | Checks diff against the per-service plan |
-| `bug-hunter` | full | Finds and fixes serious bugs in new code |
-| `task-auditor` | full | Final cross-repo check against the original task |
-| `git-shipper` | fast | Feature branch, conventional commit, push (never from main) |
-| `docs-analyst` | full | Determines if Obsidian vault needs updates |
-| `docs-writer` | fast | Applies the doc update plan to the vault |
-| `pr-reviewer` | full | Standalone PR review (not a pipeline step) |
+| `plan-auditor` | full | Diff vs plan (readonly) |
+| `bug-hunter` | full | Serious bugs in new code |
+| `task-auditor` | full | Cross-repo + shared contracts (readonly) |
+| `git-shipper` | fast | Feature branch, commit, push — after approval |
+| `docs-analyst` | full | Obsidian updates, or skip if no vault |
+| `docs-writer` | fast | Applies the doc plan |
+| `pr-reviewer` | full | Standalone PR review |
 
 ## Quickstart: new service
 
 ```bash
-# 1. Copy the scaffold
-cp -R template/. /path/to/your-new-service
-cp -R .cursor   /path/to/your-new-service/
-
-# 2. Rename the service in pyproject.toml
+./scripts/init-service.sh /path/to/your-new-service
 cd /path/to/your-new-service
-# Edit pyproject.toml → [project] name = "your-service-name"
-
-# 3. Install dev dependencies
+# Edit pyproject.toml → [project] name
 uv sync --extra dev
-# or
-python3.12 -m venv .venv && .venv/bin/pip install -e ".[dev]"
-
-# 4. Run quality gate
 bash scripts/run_quality_gate.sh
 ```
 
-GitHub Actions (`.github/workflows/quality-gate.yml`) runs that same gate on push to `main`/`master` and on pull requests.
+The script copies the scaffold, GitHub Actions, and `.cursor/rules` + `.cursor/roles`. It does **not** copy pipeline skills or agents.
+
+GitHub Actions (`.github/workflows/quality-gate.yml`) runs the same gate on push to `main`/`master` and on pull requests.
 
 ## Quickstart: multi-repo pipeline
 
-### 1. Create `pipeline.yaml` in your workspace root
+Open **this** repository (or a workspace that contains it) in Cursor. Put `pipeline.yaml` next to it:
 
 ```yaml
 main_branch: main
-obsidian_vault: /absolute/path/to/your/vault
+auto_push: false
+obsidian_vault: /absolute/path/to/your/vault   # optional
 
 repos:
   - name: billing
@@ -90,11 +86,7 @@ repos:
     path: ../auth
 ```
 
-See `pipeline.yaml.example` for a ready-to-copy template.
-
-### 2. Run the pipeline
-
-In Cursor Agent chat, type:
+See `pipeline.yaml.example`. Paths are relative to the directory that contains `pipeline.yaml`.
 
 ```
 /implement-task
@@ -103,18 +95,17 @@ Task: <describe what you want to build>
 Task ID: ABC-123
 ```
 
-The skill will:
-1. Sync all repos to `main_branch`
-2. Analyse the codebase and produce a per-service plan
-3. Spawn one implementer per service (in parallel, budget model)
-4. Loop quality gates (ruff, mypy, import-linter, pytest) until all pass
-5. Audit each service against the plan; fix gaps
-6. Hunt serious bugs; fix and re-gate
-7. Final cross-repo audit against the original task
-8. Create `feat/<TASK_ID>-<slug>` branch, commit (Conventional Commits), push
-9. Analyse Obsidian vault and update docs if needed
+What runs:
 
-If a custom `subagent_type` is missing from Task, the orchestrator falls back to `generalPurpose` plus the matching `.cursor/agents/<name>.md` prompt.
+1. Sync every listed repo to `main_branch` (`git pull --ff-only`). Stops on dirty trees.
+2. Plan: shared contracts + implementation waves + per-service plans (saved to `.pipeline/<TASK_ID>.md`).
+3. Implement wave by wave (parallel inside a wave). Implementers are **resumed** on rework.
+4. Quality gate in each **changed** service (ruff, mypy, import-linter, pytest).
+5. Plan audit → bug hunt → cross-repo task audit against shared contracts.
+6. Show a ship summary. Push only after you confirm, unless `auto_push: true`.
+7. Obsidian docs if `obsidian_vault` exists; otherwise skip.
+
+If a custom `subagent_type` is missing from Task, the orchestrator falls back to `generalPurpose` plus `.cursor/agents/<name>.md`.
 
 ## Service architecture (hexagonal)
 
@@ -134,8 +125,6 @@ The `template/` scaffold includes:
 
 - `GET /health` — thin probe in `interfaces` (no domain)
 - `GET /notes/{note_id}` — async `NoteRepository` port, SQLAlchemy adapter, use case, Pydantic schema
-
-It passes `ruff`, `mypy --strict`, `lint-imports`, and `pytest` out of the box.
 
 ## Tech stack
 
